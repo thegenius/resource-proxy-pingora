@@ -89,7 +89,6 @@ pub trait RequestFilter: Sized {
     where
         Self::CTX: Send,
     {
-        // let session_wrapper = SessionWrapperImpl::new(session,  &mut ctx.extensions, false);
         let result = self.request_filter(session, ctx).await?;
         Ok(result == RequestFilterResult::ResponseSent)
     }

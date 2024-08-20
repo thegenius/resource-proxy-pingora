@@ -33,3 +33,4 @@ mod deserialize;
 pub use compression_algorithm::{CompressionAlgorithm, UnsupportedCompressionAlgorithm};
 pub use configuration::{StaticFilesConf, StaticFilesOpt};
 pub use handler::StaticFilesHandler;
+pub use request_filter::RequestFilter;
