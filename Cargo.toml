@@ -1,6 +1,6 @@
 [package]
 name = "resource-proxy-pingora"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Wang Wei"]
 repository = "https://github.com/thegenius/resource-proxy-pingora"
 categories = ["network-programming", "web-programming::http-server"]
