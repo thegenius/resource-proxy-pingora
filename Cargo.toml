@@ -13,7 +13,7 @@ A Pingora module for serving static files
 """
 
 [lib]
-name = "resource-proxy-pingora"
+name = "resource_proxy_pingora"
 path = "src/lib.rs"
 
 [dependencies]
