@@ -3,7 +3,8 @@ use maud::{html, DOCTYPE};
 
 use pingora::{Error};
 use pingora::http::ResponseHeader;
-use crate::session_wrapper::SessionWrapper;
+// use crate::session_wrapper::SessionWrapper;
+use pingora::proxy::Session;
 
 /// Produces the text of a standard response page for the given status code.
 pub fn response_text(status: StatusCode) -> String {
@@ -31,7 +32,7 @@ pub fn response_text(status: StatusCode) -> String {
 }
 
 async fn response(
-    session: &mut impl SessionWrapper,
+    session: &mut Session,
     status: StatusCode,
     location: Option<&str>,
     cookie: Option<&str>,
@@ -62,7 +63,7 @@ async fn response(
 
 /// Responds with a standard error page for the given status code.
 pub async fn error_response(
-    session: &mut impl SessionWrapper,
+    session: &mut Session,
     status: StatusCode,
 ) -> Result<(), Box<Error>> {
     response(session, status, None, None).await
@@ -70,7 +71,7 @@ pub async fn error_response(
 
 /// Responds with a redirect to the given location.
 pub async fn redirect_response(
-    session: &mut impl SessionWrapper,
+    session: &mut Session,
     status: StatusCode,
     location: &str,
 ) -> Result<(), Box<Error>> {
@@ -79,7 +80,7 @@ pub async fn redirect_response(
 
 /// Responds with a redirect to the given location and setting a cookie.
 pub async fn redirect_response_with_cookie(
-    session: &mut impl SessionWrapper,
+    session: &mut Session,
     status: StatusCode,
     location: &str,
     cookie: &str,

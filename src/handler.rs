@@ -18,12 +18,12 @@ use async_trait::async_trait;
 use http::{method::Method, status::StatusCode};
 use log::{debug, info, warn};
 use pingora::{Error, ErrorType};
-use crate::session_wrapper::SessionWrapper;
+// use crate::session_wrapper::SessionWrapper;
 use crate::standard_response::{error_response, redirect_response};
 use crate::request_filter::{RequestFilter, RequestFilterResult};
 use std::io::ErrorKind;
 use std::path::PathBuf;
-
+use pingora::proxy::Session;
 use crate::compression::Compression;
 use crate::configuration::StaticFilesConf;
 use crate::file_writer::file_response;
@@ -54,6 +54,8 @@ pub struct StaticFilesHandler {
     declare_charset_matcher: MimeMatcher,
 }
 
+
+
 #[async_trait]
 impl RequestFilter for StaticFilesHandler {
     type Conf = StaticFilesConf;
@@ -64,7 +66,7 @@ impl RequestFilter for StaticFilesHandler {
 
     async fn request_filter(
         &self,
-        session: &mut impl SessionWrapper,
+        session: &mut Session,
         _ctx: &mut Self::CTX,
     ) -> Result<RequestFilterResult, Box<Error>> {
         let root = if let Some(root) = self.root.as_ref() {
@@ -74,7 +76,7 @@ impl RequestFilter for StaticFilesHandler {
             return Ok(RequestFilterResult::Unhandled);
         };
 
-        let uri = session.uri();
+        let uri = &session.req_header().uri;
         debug!("received URI path {}", uri.path());
 
         let (mut path, not_found) = match resolve_uri(uri.path(), root) {
@@ -135,7 +137,7 @@ impl RequestFilter for StaticFilesHandler {
                     }
 
                     if let Some(prefix) = session
-                        .original_uri()
+                        .req_header().uri
                         .path()
                         .strip_suffix(uri.path())
                         .filter(|p| !p.is_empty())

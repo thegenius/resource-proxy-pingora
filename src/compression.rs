@@ -17,10 +17,10 @@
 use http::{header, status::StatusCode};
 use pingora::{Error};
 use pingora::modules::http::compression::{ResponseCompression};
-use crate::session_wrapper::SessionWrapper;
+// use crate::session_wrapper::SessionWrapper;
 use pingora::http::ResponseHeader;
 use std::path::{Path, PathBuf};
-
+use pingora::proxy::Session;
 use crate::compression_algorithm::{find_matches, CompressionAlgorithm};
 
 /// Encapsulates the compression state for the current session.
@@ -34,7 +34,7 @@ impl<'a> Compression<'a> {
     /// Creates a new compression state supporting the given compression algorithms for
     /// pre-compressed files. *Note*: Dynamic compression is determined by the Pingora session.
     pub(crate) fn new(
-        session: &impl SessionWrapper,
+        session: &Session,
         precompressed: &'a [CompressionAlgorithm],
     ) -> Self {
         Self {
@@ -51,7 +51,7 @@ impl<'a> Compression<'a> {
     /// Checks whether the given path should be rewritten to a pre-compressed version of the file.
     pub(crate) fn rewrite_path(
         &mut self,
-        session: &impl SessionWrapper,
+        session: &Session,
         path: &Path,
     ) -> Option<PathBuf> {
         if self.precompressed.is_empty() {
@@ -82,7 +82,7 @@ impl<'a> Compression<'a> {
     /// add `Content-Encoding` HTTP header among other thins.
     pub(crate) fn transform_header(
         &mut self,
-        _session: &mut impl SessionWrapper,
+        _session: &mut Session,
         mut header: Box<ResponseHeader>,
     ) -> Result<Box<ResponseHeader>, Box<Error>> {
         let mut header =

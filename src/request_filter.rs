@@ -2,9 +2,10 @@
 
 use log::{error, info, trace};
 use pingora::{Error, ErrorType};
+use pingora::prelude::Session;
 use pingora_core::modules::http::HttpModules;
 use pingora_core::upstreams::peer::HttpPeer;
-use crate::session_wrapper::SessionWrapper;
+// use crate::session_wrapper::{SessionWrapper, SessionWrapperImpl};
 use serde::{de::DeserializeSeed, Deserialize};
 use std::fmt::Debug;
 use std::fs::File;
@@ -19,6 +20,7 @@ use std::path::Path;
 pub use async_trait;
 #[doc(hidden)]
 pub use clap;
+
 #[doc(hidden)]
 pub use serde;
 #[doc(hidden)]
@@ -77,10 +79,19 @@ pub trait RequestFilter: Sized {
     /// [`pingora::ProxyHttp::early_request_filter`].
     async fn early_request_filter(
         &self,
-        _session: &mut impl SessionWrapper,
+        _session: &mut Session,
         _ctx: &mut Self::CTX,
     ) -> Result<(), Box<Error>> {
         Ok(())
+    }
+
+    async fn handle(&self, session: &mut Session, ctx: &mut Self::CTX) -> Result<bool, Box<Error>>
+    where
+        Self::CTX: Send,
+    {
+        // let session_wrapper = SessionWrapperImpl::new(session,  &mut ctx.extensions, false);
+        let result = self.request_filter(session, ctx).await?;
+        Ok(result == RequestFilterResult::ResponseSent)
     }
 
     /// Handler to run during Pingora’s `request_filter` phase, see
@@ -88,7 +99,7 @@ pub trait RequestFilter: Sized {
     /// for the existence of multiple chained handlers.
     async fn request_filter(
         &self,
-        _session: &mut impl SessionWrapper,
+        _session: &mut Session,
         _ctx: &mut Self::CTX,
     ) -> Result<RequestFilterResult, Box<Error>> {
         Ok(RequestFilterResult::Unhandled)
@@ -100,7 +111,7 @@ pub trait RequestFilter: Sized {
     /// return `None`, an error will be returned to Pingora.
     async fn upstream_peer(
         &self,
-        _session: &mut impl SessionWrapper,
+        _session: &mut Session,
         _ctx: &mut Self::CTX,
     ) -> Result<Option<Box<HttpPeer>>, Box<Error>> {
         Ok(None)
@@ -109,7 +120,7 @@ pub trait RequestFilter: Sized {
     /// Handler to run during Pingora’s `logging` phase, see [`pingora::ProxyHttp::logging`].
     async fn logging(
         &self,
-        _session: &mut impl SessionWrapper,
+        _session: &mut Session,
         _e: Option<&Error>,
         _ctx: &mut Self::CTX,
     ) {

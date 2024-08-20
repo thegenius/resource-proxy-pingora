@@ -15,10 +15,10 @@
 //! Byte range processing (`Range` HTTP header)
 
 use http::header;
-use crate::session_wrapper::SessionWrapper;
+// use crate::session_wrapper::SessionWrapper;
 use crate::request_filter::RequestFilter;
 use std::str::FromStr;
-
+use pingora::proxy::Session;
 use crate::metadata::Metadata;
 
 /// Represents the result of parsing the `Range` HTTP header.
@@ -71,7 +71,7 @@ impl Range {
 /// all result in `None` being returned.
 ///
 /// Note: Multiple ranges are not supported.
-pub fn extract_range(session: &impl SessionWrapper, meta: &Metadata) -> Option<Range> {
+pub fn extract_range(session: &Session, meta: &Metadata) -> Option<Range> {
     let headers = &session.req_header().headers;
     if let Some(value) = headers
         .get(header::IF_RANGE)

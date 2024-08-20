@@ -18,18 +18,19 @@ use bytes::BytesMut;
 use http::status::StatusCode;
 use log::error;
 use pingora::{Error, ErrorType};
-use crate::session_wrapper::SessionWrapper;
+// use crate::session_wrapper::SessionWrapper;
 use std::cmp::min;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use std::path::Path;
+use pingora::proxy::Session;
 
 const BUFFER_SIZE: usize = 64 * 1024;
 
 /// Writes a chunk of a file as a Pingora session response. The data will be passed through the
 /// compression handler first in case dynamic compression is enabled.
 pub(crate) async fn file_response(
-    session: &mut impl SessionWrapper,
+    session: &mut Session,
     path: &Path,
     start: u64,
     end: u64,
